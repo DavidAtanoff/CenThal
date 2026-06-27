@@ -1,0 +1,3 @@
+https://github.com/EpicGames/UnrealEngine/tree/release/Engine/Source/Programs/Shared/EpicGames.UHT
+https://github.com/EpicGames/UnrealEngine/tree/release/Engine/Source/Programs/Shared/EpicGames.UBA
+https://github.com/EpicGames/UnrealEngine/tree/release/Engine/Source/Runtime/CoreUObject
