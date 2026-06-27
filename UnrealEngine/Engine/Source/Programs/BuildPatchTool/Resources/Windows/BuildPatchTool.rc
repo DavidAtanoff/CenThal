@@ -1,0 +1,82 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+
+#define APSTUDIO_READONLY_SYMBOLS
+
+#include <windows.h>
+#include "../Source/Programs/BuildPatchTool/Public/BuildPatchToolVersion.h"
+#include "../Source/Runtime/Launch/Resources/Version.h"
+#include "Runtime/Launch/Resources/Windows/resource.h"
+
+#undef APSTUDIO_READONLY_SYMBOLS
+
+#define PREPROCESSOR_TO_STRING(x) PREPROCESSOR_TO_STRING_INNER(x)
+#define PREPROCESSOR_TO_STRING_INNER(x) #x
+
+#define PORTAL_VERSION_STRING \
+	VERSION_STRINGIFY(BUILDPATCHTOOL_MAJOR_VERSION) \
+	VERSION_TEXT(".") \
+	VERSION_STRINGIFY(BUILDPATCHTOOL_MINOR_VERSION) \
+	VERSION_TEXT(".") \
+	VERSION_STRINGIFY(BUILDPATCHTOOL_PATCH_VERSION) \
+	VERSION_TEXT("-") \
+	VERSION_STRINGIFY(PORTAL_CHANGELIST) \
+	VERSION_TEXT("+") \
+	PREPROCESSOR_TO_STRING(PORTAL_BRANCH_NAME)
+
+#ifdef PROJECT_PRODUCT_NAME
+#define BUILD_PROJECT_PRODUCT_NAME PREPROCESSOR_TO_STRING(PROJECT_PRODUCT_NAME)
+#else
+#define BUILD_PROJECT_PRODUCT_NAME PREPROCESSOR_TO_STRING(UE_APP_NAME)
+#endif
+
+#ifdef PROJECT_PRODUCT_IDENTIFIER
+#define BUILD_PROJECT_PRODUCT_IDENTIFIER PREPROCESSOR_TO_STRING(PROJECT_PRODUCT_IDENTIFIER)
+#else
+#define BUILD_PROJECT_PRODUCT_IDENTIFIER EPIC_PRODUCT_IDENTIFIER
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION BUILDPATCHTOOL_MAJOR_VERSION, BUILDPATCHTOOL_MINOR_VERSION, BUILDPATCHTOOL_PATCH_VERSION, 0
+ PRODUCTVERSION BUILDPATCHTOOL_MAJOR_VERSION, BUILDPATCHTOOL_MINOR_VERSION, BUILDPATCHTOOL_PATCH_VERSION, 0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x0L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+			VALUE "CompanyName", EPIC_COMPANY_NAME
+			VALUE "LegalCopyright", EPIC_COPYRIGHT_STRING
+			VALUE "ProductName", "Build Patch Tool"
+			VALUE "ProductVersion", PORTAL_VERSION_STRING
+			VALUE "FileDescription", BUILD_PROJECT_PRODUCT_NAME
+			VALUE "InternalName", BUILD_PROJECT_PRODUCT_IDENTIFIER
+			VALUE "OriginalFilename", PREPROCESSOR_TO_STRING(ORIGINAL_FILE_NAME)
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDICON_UE4Game          ICON                    "UnrealEngineLauncher.ico"

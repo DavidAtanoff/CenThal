@@ -1,0 +1,9 @@
+https://github.com/EpicGames/UnrealEngine/tree/release/Engine/Source/Programs/Shared/EpicGames.UHT
+https://github.com/EpicGames/UnrealEngine/tree/release/Engine/Source/Programs/Shared/EpicGames.UBA
+https://github.com/EpicGames/UnrealEngine/tree/release/Engine/Source/Runtime/CoreUObject
+https://github.com/EpicGames/UnrealEngine/tree/release/Engine/Source/Programs/UnrealBuildTool
+https://github.com/EpicGames/UnrealEngine/tree/release/Engine/Source/Programs/UnrealBuildAccelerator
+https://github.com/EpicGames/UnrealEngine/tree/release/Engine/Source/Programs/ShaderBuildWorker
+https://github.com/EpicGames/UnrealEngine/tree/release/Engine/Source/Programs/BuildPatchTool
+https://github.com/EpicGames/UnrealEngine/tree/release/Engine/Source/Runtime/VectorVM
+https://github.com/EpicGames/UnrealEngine/tree/release/Engine/Source/Runtime/VerseCompiler
