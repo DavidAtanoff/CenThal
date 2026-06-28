@@ -1,0 +1,99 @@
+//! Spec §5.3, §6.2 — structs vs classes vs enums vs traits.
+//! Each kind demonstrates the value-vs-reference distinction.
+
+use ue::AActor;
+
+/// Plain struct (NOT reflected by default in v0.3).
+struct Vec3 {
+    var x: f32
+    var y: f32
+    var z: f32
+
+    fn length(self: Self) -> f32 {
+        return (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+    }
+
+    fn normalize(self: Self) -> Vec3 {
+        let len = self.length()
+        if len == 0.0 {
+            return Vec3 { x: 0.0, y: 0.0, z: 0.0 }
+        }
+        return Vec3 { x: self.x / len, y: self.y / len, z: self.z / len }
+    }
+}
+
+/// Reflected struct — requires @ustruct.
+@ustruct
+pub struct Color {
+    pub var r: u8 = 0
+    pub var g: u8 = 0
+    pub var b: u8 = 0
+    pub var a: u8 = 255
+}
+
+/// POD struct — memcpy-safe, no GC refs.
+@pod
+pub struct AABB {
+    var min: v3
+    var max: v3
+
+    fn contains(self: Self, p: v3) -> bool {
+        return p.x >= self.min.x && p.x <= self.max.x
+            && p.y >= self.min.y && p.y <= self.max.y
+            && p.z >= self.min.z && p.z <= self.max.z
+    }
+}
+
+/// Enum — reflected by default in v0.3.
+pub enum Element : u8 {
+    Fire
+    Water
+    Earth
+    Air
+}
+
+/// Enum with payload — algebraic data type.
+pub enum Result {
+    Ok(i32)
+    Err(str)
+}
+
+/// Trait — becomes UInterface when pub (§6.2).
+pub trait Serializable {
+    pub fn serialize() -> arr<u8>;
+    pub fn deserialize(data: arr<u8>) -> Self;
+}
+
+/// Class — reference type, reflected.
+pub class Player : AActor {
+    pub var name: str = "Player"
+    pub var health: f32 = 100.0
+
+    pub fn display_info() -> str, pure {
+        return f"{self.name} (HP: {self.health})"
+    }
+}
+
+/// Struct with method implementations.
+@pod
+pub struct Inventory {
+    var items: arr<name>
+    var capacity: i32
+
+    fn add(self: mut Self, item: name) -> bool {
+        if self.items.len() >= self.capacity {
+            return false
+        }
+        self.items.push(item)
+        return true
+    }
+
+    fn remove(self: mut Self, item: name) -> bool {
+        let idx = self.items.find(item)
+        if idx == -1 {
+            return false
+        }
+        self.items.remove(idx)
+        return true
+    }
+}

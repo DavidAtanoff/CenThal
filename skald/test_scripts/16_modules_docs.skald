@@ -1,0 +1,115 @@
+//! Spec §4.8, §15.8 — doc comments, module structure, use trees.
+
+use ue::AActor;
+use ue::log;
+use ue::math::{sin, cos, tan};
+use ue::collections::*;
+use ue::networking::rpc::{
+    reliable_call,
+    unreliable_call,
+    server_only,
+};
+
+//! Module-level documentation.
+//! This is the AI module — handles all NPC behavior.
+
+/// AI controller that switches between behaviors based on game state.
+///
+/// The controller cycles through Patrol, Investigate, and Combat states
+/// depending on what it has observed. See the FSM diagram:
+///
+/// ```text
+/// Patrol -> Investigate (on hearing noise)
+/// Investigate -> Combat (on seeing enemy)
+/// Combat -> Investigate (on losing sight)
+/// Investigate -> Patrol (on reaching last known position)
+/// ```
+///
+/// [Spec reference](https://example.com/ai-spec)
+pub class AiController : AActor {
+    /// Current state of the FSM.
+    pub var state: name = "Patrol", category="AI"
+
+    /// Time spent in the current state.
+    pub var time_in_state: f32 = 0.0, readonly, category="AI"
+
+    /// Target actor, if any.
+    pub var target: weak<AActor>, category="AI"
+
+    /// Maximum detection range in centimeters.
+    pub var detection_range: f32 = 1500.0, clamp(100.0, 10000.0), category="AI|Sight"
+
+    /// Update the FSM. Called every frame.
+    pub fn tick_fsm(dt: f32), category="AI" {
+        self.time_in_state += dt
+        match self.state {
+            "Patrol" => self.tick_patrol(dt),
+            "Investigate" => self.tick_investigate(dt),
+            "Combat" => self.tick_combat(dt),
+            _ => log::info(f"Unknown state: {self.state}"),
+        }
+    }
+
+    fn tick_patrol(dt: f32) {
+        let _ = dt
+        // Implementation
+    }
+
+    fn tick_investigate(dt: f32) {
+        let _ = dt
+    }
+
+    fn tick_combat(dt: f32) {
+        let _ = dt
+    }
+
+    fn begin_play() override {
+        super.begin_play()
+        log::info("AiController initialized")
+    }
+}
+
+/// Submodule for behavior tree nodes.
+mod bt_nodes {
+    /// Base trait for all BT nodes.
+    pub trait BtNode {
+        /// Execute this node. Returns true on success, false on failure.
+        pub fn execute() -> bool;
+    }
+
+    /// Sequence node — runs children in order until one fails.
+    pub class Sequence : AActor {
+        pub var children: arr<ref<BtNode>>
+
+        pub fn execute() -> bool, override {
+            for child in self.children {
+                if !child.execute() {
+                    return false
+                }
+            }
+            return true
+        }
+    }
+
+    /// Selector node — runs children in order until one succeeds.
+    pub class Selector : AActor {
+        pub var children: arr<ref<BtNode>>
+
+        pub fn execute() -> bool, override {
+            for child in self.children {
+                if child.execute() {
+                    return true
+                }
+            }
+            return false
+        }
+    }
+}
+
+/// Use math functions.
+fn math_demo(x: f32) -> f32 {
+    let s = sin(x)
+    let c = cos(x)
+    let t = tan(x)
+    return s + c + t
+}

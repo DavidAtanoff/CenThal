@@ -1,0 +1,50 @@
+//! Spec §11 — FFI strategy showcase.
+//! extern decls, @borrow annotations, snake_case/PascalCase mapping.
+
+use ue::AActor;
+use ue::FMath;
+
+/// External C function declaration.
+extern "C" fn skald_ue_AActor_SetActorLocation(self: ref<AActor>, loc: v3) -> bool;
+
+/// @borrow on params — passes FStringView, no FString copy (§9.6).
+fn log_message(@borrow msg: str) {
+    ue_log(msg)
+}
+
+/// External log function.
+extern "C" fn ue_log(data: *u8, len: i32);
+
+/// Free function calling both UE and Skald-defined methods (§11.3).
+fn call_examples(actor: ref<AActor>) {
+    // Reflected method call — direct via UFunction::Func.
+    actor.set_actor_location(v3(0, 0, 0))
+
+    // Skald-defined pub fn — dispatches via UFunction.
+    actor.alert(0.5)
+
+    // Header-mode binding (FMath::Sin).
+    let s = FMath::sin(3.14)
+
+    // Late-bound UFunction::Invoke (rare, opt-in).
+    let val = actor.call("Alert", 0.5)
+    let _ = val
+}
+
+/// Cross-module inlining via @inline(always) (§11.5).
+@inline(always)
+fn fast_sin(x: f32) -> f32 => x * 3.14159 / 180.0
+
+/// @persistent closure promotion (§9.4).
+@persistent
+fn make_callback(threshold: f32) -> fn(f32) -> bool {
+    return @persistent |v| v > threshold
+}
+
+/// String literal examples (§4.7).
+fn string_demo() {
+    let owned: str = "hello".to_upper()
+    let borrowed = "literal"
+    let interpolated = f"{owned} + {borrowed} = {owned.len() + borrowed.len()}"
+    let _ = interpolated
+}

@@ -1,0 +1,89 @@
+//! Spec §13.1-13.4 — async, spawn worker, snapshot/command pattern, parallel for.
+//! Concurrency showcase.
+
+use ue::AActor;
+use ue::log;
+use ue::io;
+use ue::spawn;
+use ue::world;
+
+/// POD snapshot of actor state — safe to send to worker threads.
+@pod
+struct ActorSnapshot {
+    var pos: v3
+    var vel: v3
+    var health: f32
+}
+
+/// POD command back from worker — applied on game thread.
+@pod
+struct AiCommand {
+    var move_to: v3
+    var set_health: f32
+}
+
+/// Worker-thread AI computation. Pure data in, pure data out.
+fn compute_ai(snapshots: arr<ActorSnapshot>) -> arr<AiCommand> {
+    let cmds = arr::with_capacity(snapshots.len())
+    for snap in snapshots {
+        let move_to = snap.pos + snap.vel * 0.016
+        let health = snap.health - 1.0
+        cmds.push(AiCommand { move_to, set_health: health })
+    }
+    return cmds
+}
+
+/// Tick AI on a worker thread using the snapshot/command pattern (§13.2).
+fn tick_ai_on_worker(actors: arr<ref<AActor>>) {
+    // 1. Snapshot on game thread.
+    let snapshots: arr<ActorSnapshot> = actors.map(|a| ActorSnapshot {
+        pos: a.get_actor_location(),
+        vel: a.get_velocity(),
+        health: a.health,
+    })
+
+    // 2. Send to worker.
+    spawn worker {
+        let commands = compute_ai(snapshots)
+
+        // 3. Enqueue commands back to game thread.
+        game_thread::run(|| {
+            for (actor, cmd) in actors.zip(commands) {
+                actor.set_actor_location(cmd.move_to)
+                actor.health = cmd.set_health
+            }
+        })
+    }
+}
+
+/// Async fetch of save data, resumable on the game thread (§13.3).
+async fn fetch_save_data(save_id: i64) -> arr<u8> {
+    let blob = await io::read_async(save_id)
+    return blob
+}
+
+/// Caller spawns an async task and awaits it.
+fn load_save(id: i64) {
+    let data = spawn async { fetch_save_data(id) }.await
+    log::info(f"Loaded {data.len()} bytes")
+}
+
+/// Parallel for — maps to UE's ParallelFor (§13.4).
+pub class ParticleSim : AActor {
+    pub var particle_count: i32 = 0, readonly
+
+    fn tick(dt: f32) override {
+        let particles = self.particles
+        parallel for i in 0..particles.len() {
+            particles[i].pos += particles[i].vel * dt
+        }
+        self.particle_count = particles.len()
+    }
+
+    private var particles: arr<Particle> = arr::new()
+}
+
+struct Particle {
+    var pos: v3
+    var vel: v3
+}

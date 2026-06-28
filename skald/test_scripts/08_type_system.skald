@@ -1,0 +1,97 @@
+//! Spec §5.1-5.7 — type system showcase.
+//! Every primitive, built-in UE-mapped type, reference type, smart pointer.
+
+use ue::AActor;
+
+pub class TypeShowcase : AActor {
+    // Primitives (§5.1)
+    pub var i8_v: i8 = 0
+    pub var i16_v: i16 = 0
+    pub var i32_v: i32 = 0
+    pub var i64_v: i64 = 0
+    pub var i128_v: i128 = 0
+    pub var u8_v: u8 = 0
+    pub var u16_v: u16 = 0
+    pub var u32_v: u32 = 0
+    pub var u64_v: u64 = 0
+    pub var u128_v: u128 = 0
+    pub var f32_v: f32 = 0.0
+    pub var f64_v: f64 = 0.0
+    pub var bool_v: bool = false
+    pub var char_v: char = 'a'
+    pub var str_v: str = "hello"
+
+    // Math types (§5.2)
+    pub var v2_v: v2 = v2(0, 0)
+    pub var v3_v: v3 = v3(1, 2, 3)
+    pub var v4_v: v4 = v4(0, 0, 0, 1)
+    pub var quat_v: quat = quat(0, 0, 0, 1)
+    pub var rot_v: rot = rot(0, 0, 0)
+    pub var mat4_v: mat4 = mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+
+    // Strings & names (§5.2)
+    pub var name_v: name = "Player"
+    pub var text_v: text = "Localized"
+
+    // Containers (§5.2)
+    pub var arr_v: arr<i32> = arr::new()
+    pub var map_v: map<name, i32> = map::new()
+    pub var set_v: set<name> = set::new()
+    pub var opt_v: opt<i32> = null
+
+    // UObject references (§5.2, §5.7)
+    pub var ref_v: ref<AActor>
+    pub var weak_v: weak<AActor>
+    pub var soft_v: soft<AActor>
+    pub var subclass_v: subclass<AActor>
+
+    // Nullable forms
+    pub var maybe_actor: ref<AActor>?
+    pub var maybe_vec: v3?
+}
+
+/// Type inference for `let` bindings (§5.8).
+fn inference_demo() {
+    let x = 5              // i32
+    let y = 5.0            // f64
+    let z = 5.0f32         // f32
+    let v = v3(1, 2, 3)    // v3
+    let b = true           // bool
+    let s = "literal"      // str
+    let arr: arr<i32> = arr::new()
+    let inferred_arr = arr  // arr<i32>
+    let _unused = inferred_arr
+}
+
+/// Nullability handling (§5.7).
+fn nullability_demo(maybe: ref<AActor>?) -> str {
+    // ! unwrap — panics if null
+    let actor: ref<AActor> = maybe!
+    // ?. optional chain
+    let n = maybe?.name()
+    // ?: Elvis
+    let safe_n = maybe?.name() ?: "<none>"
+    // ?? null coalesce
+    let safe_n2 = maybe?.name() ?? "<none>"
+    return safe_n
+}
+
+/// Raw pointers (only in @unsafe).
+@unsafe
+fn raw_ptr_demo() {
+    let x: i32 = 42
+    let p: *i32 = &x
+    let mut y: i32 = 0
+    let pm: *mut i32 = &mut y
+    let _ = p
+    let _ = pm
+}
+
+/// Function pointer / closure type.
+fn closure_demo() {
+    let f: fn(i32) -> i32 = |x| x + 1
+    let g = |a: i32, b: i32| a * b
+    let h = || 42
+    let result = f(10) + g(3, 4) + h()
+    let _ = result
+}

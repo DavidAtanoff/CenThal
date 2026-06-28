@@ -1,0 +1,167 @@
+//! Comprehensive syntax stress test — every parsing edge case I can think of.
+
+use ue::AActor;
+
+pub class StressTest : AActor {
+    // Nested generics
+    pub var nested: arr<map<name, arr<ref<AActor>>>>
+    pub var deep: opt<arr<opt<ref<AActor>>>>
+
+    // Chained method calls
+    fn chained(x: arr<i32>) -> arr<i32> {
+        return x.iter().filter(|v| v > 0).map(|v| v * 2).collect()
+    }
+
+    // Complex match
+    fn complex_match(opt: opt<i32>) -> i32 {
+        return match opt {
+            null => 0,
+            x => match x {
+                0 => 1,
+                1 | 2 => 2,
+                _ if x > 10 => 3,
+                _ => 4,
+            },
+        }
+    }
+
+    // Nested if/else expressions
+    fn nested_if(x: i32, y: i32) -> i32 {
+        return if x > 0 {
+            if y > 0 { 1 } else { 2 }
+        } else {
+            if y > 0 { 3 } else { 4 }
+        }
+    }
+
+    // Tuple destructuring
+    fn tuple_destructure() {
+        let (a, b, c) = (1, 2, 3)
+        let (x, _, z) = (10, 20, 30)
+        let _ = (a, b, c, x, z)
+    }
+
+    // Struct destructuring in pattern
+    fn struct_destructure(p: Point) {
+        let Point { x, y } = p
+        let Point { x: px, y: py } = p
+        let _ = (x, y, px, py)
+    }
+
+    // Range patterns
+    fn range_pat(n: i32) -> i32 {
+        return match n {
+            0..=9 => 0,
+            10..=99 => 1,
+            100..=999 => 2,
+            _ => 3,
+        }
+    }
+
+    // Or-patterns with bindings
+    fn or_pattern(x: i32) -> str {
+        return match x {
+            1 | 2 | 3 => "low",
+            4 | 5 | 6 => "mid",
+            _ => "high",
+        }
+    }
+
+    // Mixed binary precedence
+    fn precedence() -> i32 {
+        return 1 + 2 * 3 - 4 / 2 % 3 << 1 & 0xFF | 0x10 ^ 0x20
+    }
+
+    // Long expression chain
+    fn long_chain(x: i32) -> i32 {
+        return x
+            |> |v| v + 1
+            |> |v| v * 2
+            |> |v| v - 3
+            |> |v| v / 4
+            |> |v| v % 5
+    }
+
+    // Optional chaining on every form
+    fn optional_chain(maybe: ref<AActor>?) -> str {
+        let a = maybe?.name()
+        let b = maybe?.location().x
+        let c = maybe?.method_with_args(1, 2, 3)
+        let _ = (a, b, c)
+        return "ok"
+    }
+
+    // Inline struct literal in expression
+    fn inline_struct() {
+        let arr = arr::with_capacity(3)
+        arr.push(Point { x: 1, y: 2 })
+        arr.push(Point { x: 3, y: 4 })
+        arr.push(Point { x: 5, y: 6 })
+    }
+
+    // String interpolation with complex expressions
+    fn interpolation(p: Point) {
+        let s = f"Point at ({p.x}, {p.y}) — distance: {p.x * p.x + p.y * p.y}"
+        log::info(s)
+        log::info(f"Computed: {p.x |> |v| v * 2}")
+    }
+
+    // Block as expression
+    fn block_expr(x: i32) -> i32 {
+        let result = {
+            let a = x * 2
+            let b = a + 1
+            b * 3
+        }
+        return result
+    }
+
+    // Unsafe block as expression
+    @unsafe
+    fn unsafe_expr() -> i32 {
+        let result = @unsafe {
+            let p: *mut i32 = std::ptr::null_mut()
+            let _ = p
+            42
+        }
+        return result
+    }
+
+    // Async function with multiple awaits
+    async fn multi_await() -> i32 {
+        let a = await async_op1()
+        let b = await async_op2(a)
+        let c = await async_op3(b)
+        return c
+    }
+
+    pub var health: f32 = 100.0
+}
+
+struct Point {
+    var x: i32
+    var y: i32
+}
+
+extern "C" fn async_op1() -> i32;
+extern "C" fn async_op2(a: i32) -> i32;
+extern "C" fn async_op3(b: i32) -> i32;
+
+// Free functions
+fn sum_range(lo: i32, hi: i32) -> i32 {
+    var total = 0
+    for i in lo..hi {
+        total += i
+    }
+    return total
+}
+
+fn factorial(n: i32) -> i32 {
+    if n <= 1 { return 1 }
+    return n * factorial(n - 1)
+}
+
+fn fib(n: i32) -> i32 {
+    if n < 2 { return n }
+    return fib(n - 1) + fib(n - 2)
+}

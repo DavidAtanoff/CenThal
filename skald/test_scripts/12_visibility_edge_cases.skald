@@ -1,0 +1,55 @@
+//! Spec §6.3 — opting OUT of reflection defaults.
+//! Edge cases where defaults don't match user intent.
+
+use ue::AActor;
+use ue::UObject;
+
+/// Not Blueprintable — internal helper class.
+pub class InternalHelper : UObject, not_blueprintable { }
+
+/// Field that is NOT editable but still Blueprint-readwrite.
+pub class MixedVisibility : AActor {
+    pub var internal_state: f32 = 0.0, not_editable
+    pub var cached_value: f32 = 0.0, readonly
+    pub var editor_only: i32 = 0, editdefaults_only
+}
+
+/// Function that is NOT Blueprint-callable — C++ only.
+pub class CppOnly : AActor {
+    pub fn internal_helper(), not_callable { }
+    pub fn blueprint_visible(), callable, category="Public" { }
+}
+
+/// Static method — class-level, not on instances.
+pub class Factory : AActor {
+    pub fn create_default() -> Factory, static {
+        return Factory {}
+    }
+}
+
+/// Generic class cannot be reflected — must alias to concrete (§5.4, §6.4).
+class Pool<T> {
+    var items: arr<T>
+    fn acquire() -> T? {
+        if self.items.is_empty() {
+            return null
+        }
+        return self.items.pop()
+    }
+}
+
+type ActorPool = Pool<AActor>
+
+pub class Spawner : AActor {
+    pub var pool: ActorPool
+}
+
+/// Const — never reflected (§6.4).
+pub const MAX_HEALTH: f32 = 1000.0
+
+/// Static var — cannot be pub (§6.4).
+private static var counter: i32 = 0
+
+/// Type alias to a primitive.
+type Health = f32
+type EntityId = u64

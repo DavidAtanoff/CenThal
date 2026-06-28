@@ -1,0 +1,7 @@
+use ue::AActor;
+use ue::log;
+
+pub class Greeter : AActor {
+    pub var greeting: str = "Hello"
+    pub var target_tag: name = "Player"
+}

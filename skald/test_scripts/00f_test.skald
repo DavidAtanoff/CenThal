@@ -1,0 +1,5 @@
+pub class Greeter {
+    fn begin_play() override {
+        super.begin_play()
+    }
+}

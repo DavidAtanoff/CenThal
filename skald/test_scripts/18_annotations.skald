@@ -1,0 +1,132 @@
+//! Spec §4.5, §5.6 — annotation catalog coverage.
+//! Every @-annotation in the spec is exercised.
+
+use ue::AActor;
+use ue::log;
+
+/// @region — arena allocation.
+@region("sim_frame")
+pub fn tick_particles(particles: mut arr<Particle>, dt: f32) {
+    @simd
+    for mut p in particles {
+        p.vel += v3(0, 0, -9.8) * dt
+        p.pos += p.vel * dt
+    }
+}
+
+/// @arena — anonymous scope-local bump allocator.
+pub fn process_actors(actors: arr<ref<AActor>>) {
+    @arena {
+        let positions = arr::with_capacity(actors.len())
+        for actor in actors {
+            positions.push(actor.get_actor_location())
+        }
+        // Use positions...
+        for p in positions {
+            log::info(f"pos: {p}")
+        }
+    }  // arena freed here
+}
+
+/// @layout(soa) — struct-of-arrays on a private field.
+pub class SoaDemo : AActor {
+    @layout(soa)
+    private var particles: arr<Particle> = arr::new()
+}
+
+/// @simd — vectorizable loop body.
+pub fn simd_sum(arr: arr<f32>) -> f32 {
+    var sum: f32 = 0.0
+    @simd
+    for x in arr {
+        sum += x
+    }
+    return sum
+}
+
+/// @unsafe — raw pointers, no bounds checks.
+@unsafe
+pub fn raw_write(buf: *mut u8, len: i32, val: u8) {
+    for i in 0..len {
+        buf[i] = val
+    }
+}
+
+/// @inline variants.
+@inline(always)
+pub fn hot_always(x: i32) -> i32 => x * 2
+
+@inline(never)
+pub fn cold_never(x: i32) -> i32 => x * 3
+
+@inline(hint)
+pub fn default_inline(x: i32) -> i32 => x * 4
+
+/// @hot / @cold — PGO hints.
+@hot
+pub fn hot_path() {
+    log::info("hot")
+}
+
+@cold
+pub fn cold_path() {
+    log::info("cold")
+}
+
+/// @borrow — FStringView, no copy.
+pub fn log_message(@borrow msg: str) {
+    ue_log(msg)
+}
+
+extern "C" fn ue_log(s: str);
+
+/// @persistent — closure promotion to persistent heap.
+@persistent
+pub fn make_callback() -> fn(i32) -> bool {
+    let threshold = 10
+    return @persistent |v| v > threshold
+}
+
+/// @deprecated — mark old API.
+@deprecated("use `new_func` instead")
+pub fn old_func() => log::info("deprecated")
+
+pub fn new_func() => log::info("new")
+
+/// @ustruct — opt-in reflection for structs.
+@ustruct
+pub struct ReflectedStruct {
+    pub var x: f32 = 0.0
+    pub var y: f32 = 0.0
+}
+
+/// @allow_private — suppress the "field not reflected" warning.
+pub class AllowPrivateDemo : AActor {
+    @allow_private
+    var internal_counter: i32 = 0
+}
+
+/// @mass_fragment + @mass_processor (§12.4).
+@mass_fragment
+@pod
+pub struct Position { var v: v3 }
+
+@mass_fragment
+@pod
+pub struct Velocity { var v: v3 }
+
+@mass_processor(group="movement", tick_before="PhysicsMass", tick_after="InputMass")
+pub fn move_things(q: query<mut Position, Velocity>, dt: f32) {
+    @simd
+    for (mut pos, vel) in q {
+        pos.v += vel.v * dt
+    }
+}
+
+/// @pod — POD marker.
+@pod
+pub struct Particle {
+    var pos: v3
+    var vel: v3
+    var life: f32
+}

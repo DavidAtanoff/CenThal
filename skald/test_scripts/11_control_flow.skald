@@ -1,0 +1,110 @@
+//! Spec §4.6, §4.7 — control flow: match, if/else, loops, break values.
+
+use ue::AActor;
+
+pub class ControlFlow : AActor {
+    fn run() {
+        // If/else expression
+        let x = if true { 1 } else { 2 }
+        let _ = x
+
+        // Chained if/else
+        let y = 5
+        let label = if y < 0 {
+            "negative"
+        } else if y == 0 {
+            "zero"
+        } else if y < 10 {
+            "small"
+        } else {
+            "large"
+        }
+        let _ = label
+
+        // Match with literal patterns
+        let n = 3
+        match n {
+            0 => log::info("zero"),
+            1 | 2 | 3 => log::info("small"),
+            _ => log::info("other"),
+        }
+
+        // Match with bind
+        let opt: i32? = 42
+        match opt {
+            null => log::info("none"),
+            x => log::info(f"value: {x}"),
+        }
+
+        // Match with guard
+        let score = 75
+        let grade = match score {
+            s if s >= 90 => "A",
+            s if s >= 80 => "B",
+            s if s >= 70 => "C",
+            _ => "F",
+        }
+        let _ = grade
+
+        // Match struct
+        let p = Point { x: 1, y: 2 }
+        match p {
+            Point { x: 0, y: 0 } => log::info("origin"),
+            Point { x, y } => log::info(f"({x}, {y})"),
+        }
+
+        // For loop with break value
+        let count = for i in 0..10 {
+            if i == 5 { break i }
+        }
+        let _ = count
+
+        // While loop
+        var i = 0
+        while i < 10 {
+            i += 1
+        }
+
+        // Loop with cont
+        var j = 0
+        loop {
+            j += 1
+            if j % 2 == 0 { cont }
+            if j > 10 { break }
+        }
+
+        // Loop with break value
+        let result = loop {
+            if j > 100 { break j }
+            j += 1
+        }
+        let _ = result
+    }
+}
+
+struct Point {
+    var x: i32
+    var y: i32
+}
+
+/// Match on enum with payload.
+pub enum Shape {
+    Circle(f32)
+    Square(v3, f32)
+    Triangle(v3, v3, v3)
+}
+
+fn area(s: Shape) -> f32 {
+    return match s {
+        Shape::Circle(r) => 3.14159 * r * r,
+        Shape::Square(_, side) => side * side,
+        Shape::Triangle(a, b, c) => {
+            // Heron's formula
+            let ab = (b - a).length()
+            let bc = (c - b).length()
+            let ca = (a - c).length()
+            let s = (ab + bc + ca) / 2.0
+            (s * (s - ab) * (s - bc) * (s - ca)).sqrt()
+        }
+    }
+}

@@ -1,0 +1,11 @@
+use ue::AActor;
+use ue::log;
+
+pub class Greeter : AActor {
+    pub var greeting: str = "Hello"
+    pub var target_tag: name = "Player"
+
+    fn begin_play() override {
+        super.begin_play()
+    }
+}

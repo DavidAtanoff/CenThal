@@ -1,0 +1,78 @@
+//! Spec §4.6 — closures, lambdas, capture semantics.
+
+use ue::AActor;
+
+pub class Closures : AActor {
+    fn run() {
+        // Simple closure, no params
+        let f = || 42
+
+        // Single-param closure
+        let g = |x: i32| x + 1
+
+        // Multi-param closure
+        let h = |a: i32, b: i32| a * b
+
+        // Closure capturing a local
+        let threshold = 10
+        let is_high = |v: i32| v > threshold
+
+        // Closure capturing `self`
+        let get_health = || self.health
+
+        // Closure returning a closure
+        let make_adder = |n: i32| {
+            return |x: i32| x + n
+        }
+        let add5 = make_adder(5)
+        let result = add5(10)
+
+        // Persistent closure — promoted to heap (§9.4).
+        let callback = @persistent |v: f32| v > 0.5
+
+        // Closure stored in field — triggers promotion.
+        // (Would be `pub var callback: fn(f32) -> bool` but that's forbidden — §6.4.)
+        let _ = callback
+
+        // Method reference via closure
+        let v = v3(1, 2, 3)
+        let length = || v.length()
+
+        // Pipe forward with closures
+        let x = 5
+        let result2 = x |> |y| y * 2 |> |z| z + 1
+
+        let _ = (f(), g(10), h(3, 4), is_high(15), get_health(),
+                 add5(10), result, length(), result2)
+    }
+
+    pub var health: f32 = 100.0
+}
+
+/// Closures with `mut` captures.
+fn mutable_capture() {
+    var counter = 0
+    let inc = || {
+        counter += 1
+        return counter
+    }
+    let _ = inc()
+    let _ = inc()
+    let _ = inc()
+}
+
+/// Higher-order function taking a closure.
+fn apply_twice(f: fn(i32) -> i32, x: i32) -> i32 => f(f(x))
+
+/// Closure as argument to method.
+fn map_demo(items: arr<i32>) -> arr<i32> {
+    return items.map(|x| x * 2)
+}
+
+fn filter_demo(items: arr<i32>) -> arr<i32> {
+    return items.filter(|x| x > 0)
+}
+
+fn reduce_demo(items: arr<i32>) -> i32 {
+    return items.reduce(0, |acc, x| acc + x)
+}

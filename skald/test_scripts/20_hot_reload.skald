@@ -1,0 +1,53 @@
+//! Spec §14 — hot-reload patterns.
+//! These compile fine; hot-reload is a runtime concern.
+
+use ue::AActor;
+use ue::log;
+
+/// A class whose fields and methods may change across hot-reloads.
+pub class HotReloadable : AActor {
+    pub var health: f32 = 100.0, replicated, clamp(0, 1000), category="Combat"
+    pub var name: str = "Default", category="Identity"
+
+    fn begin_play() override {
+        super.begin_play()
+        log::info(f"HotReloadable spawned: {self.name}")
+    }
+
+    pub fn update_health(delta: f32), reliable, category="Combat" {
+        self.health = (self.health + delta).clamp(0.0, 1000.0)
+    }
+}
+
+/// @deprecated field — kept to avoid breaking C++ references (§15.4).
+pub class WithDeprecated : AActor {
+    @deprecated("use `sight_range` instead")
+    pub var sight_radius: f32 = 500.0
+
+    pub var sight_range: f32 = 500.0, clamp(0, 5000), category="AI|Sight"
+}
+
+/// Transaction block — future AutoRTFM hook (§18.4).
+pub class TransactionalOp : AActor {
+    pub fn atomic_update(delta: f32) {
+        transaction {
+            self.update_state(delta)
+            self.save_to_disk()
+        }
+    }
+
+    fn update_state(delta: f32) {
+        let _ = delta
+    }
+
+    fn save_to_disk() { }
+}
+
+/// Quiescent-state patching — happens at runtime (§14.4).
+/// This file just needs to parse & typecheck.
+pub class Patchable : AActor {
+    pub fn tick(dt: f32) override {
+        // Function body can be patched at runtime.
+        log::info(f"tick {dt}")
+    }
+}

@@ -1,0 +1,79 @@
+//! Spec §5.5 — special compiler-known traits.
+//! Reflectable, Send, Sync, POD, Copy, Drop.
+
+use ue::AActor;
+
+/// POD struct — memcpy-safe, no destructor, no GC references.
+@pod
+pub struct Transform {
+    var translation: v3
+    var rotation: quat
+    var scale: v3
+}
+
+/// Custom destructor via Drop trait.
+pub class ResourceHolder : AActor {
+    pub var handle: u64 = 0
+}
+
+impl Drop for ResourceHolder {
+    fn drop(self: mut Self) {
+        if self.handle != 0 {
+            free_resource(self.handle)
+            self.handle = 0
+        }
+    }
+}
+
+extern "C" fn free_resource(handle: u64);
+
+/// Send + Sync POD — safe to share across threads.
+@pod
+pub struct ThreadsafeConfig {
+    var max_workers: i32
+    var timeout_ms: i64
+    var verbose: bool
+}
+
+/// ActorSnapshot for worker thread pattern (§13.2).
+/// Implicitly Send + Sync because all fields are POD.
+@pod
+pub struct ActorSnapshot {
+    var pos: v3
+    var vel: v3
+    var health: f32
+    var team_id: u8
+}
+
+/// Reflectable — auto-impl for any type used in a pub var.
+/// For user-defined structs, derive is built into the compiler.
+pub class ReflectableDemo : AActor {
+    pub var transform_field: Transform
+    pub var snapshot_field: ActorSnapshot
+}
+
+/// Copy trait — opt-in (Rust-style). POD structs are Copy.
+fn copy_demo() {
+    let a = ActorSnapshot { pos: v3(0, 0, 0), vel: v3(0, 0, 0), health: 100.0, team_id: 1 }
+    // POD types are implicitly copyable.
+    let b = a
+    // `a` is still valid.
+    let _ = (a, b)
+}
+
+/// Trait bound examples.
+fn sendable<T: Send>(x: T) -> T {
+    return x
+}
+
+fn syncable<T: Sync>(x: T) -> T {
+    return x
+}
+
+fn pod_fn<T: POD>(x: T) -> T {
+    return x
+}
+
+fn reflectable_fn<T: Reflectable>(x: T) -> T {
+    return x
+}

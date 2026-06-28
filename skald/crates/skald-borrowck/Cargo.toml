@@ -1,0 +1,13 @@
+[package]
+name = "skald-borrowck"
+description = "Lightweight borrow check: single-mut + UObject closure capture rules (spec §3.2, §13.5)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+skald-ast.workspace = true
+skald-types.workspace = true
+skald-resolve.workspace = true
+rustc-hash.workspace = true

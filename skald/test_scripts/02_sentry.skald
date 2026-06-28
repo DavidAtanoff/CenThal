@@ -1,0 +1,52 @@
+//! Spec §15.3 — mid-complexity class with modifiers.
+//! Sentry demonstrates: abstract class, replicated/clamped fields, weak refs,
+//! optional chaining, doc comments becoming UE tooltips.
+
+use ue::AActor;
+use ue::log;
+use ue::world;
+
+/// A stationary defensive structure that detects and engages enemies.
+pub class Sentry : AActor, abstract {
+    /// Maximum distance at which the sentry can detect targets.
+    pub var sight_radius: f32 = 500.0, replicated, clamp(0, 5000), category="AI|Sight"
+
+    /// The current target, if any. Replicated to clients.
+    pub var target: weak<AActor>, replicated
+
+    /// Last known position of the target.
+    pub var last_seen_pos: v3 = v3(0, 0, 0), replicated
+
+    /// Alert the sentry. Returns true if the alert was acknowledged.
+    pub fn alert(intensity: f32) -> bool, reliable, category="AI" {
+        if intensity < 0.0 || intensity > 1.0 {
+            return false
+        }
+        self.target?.alert_targeted(intensity)
+        return true
+    }
+
+    /// Compute the current threat score. Pure function — no side effects.
+    pub fn compute_threat() -> f32, pure, category="AI" {
+        let distance = self.target?.get_distance_to(self) ?? 99999.0
+        return (self.sight_radius - distance) / self.sight_radius
+    }
+
+    fn begin_play() override {
+        super.begin_play()
+        log::info(f"Sentry spawned at {self.get_actor_location()}")
+    }
+}
+
+/// A patrol sentry that wanders between waypoints.
+pub class PatrolSentry : Sentry {
+    pub var waypoint: weak<AActor>
+
+    pub fn alert(intensity: f32) -> bool, override {
+        let result = super.alert(intensity)
+        if result {
+            log::info("PatrolSentry alerted — engaging target")
+        }
+        return result
+    }
+}

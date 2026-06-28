@@ -1,0 +1,105 @@
+//! Spec §7 — comprehensive modifier coverage.
+//! Each declaration exercises a different modifier category.
+
+use ue::AActor;
+
+/// Class with abstract + within + config modifiers (§7.1).
+pub class ComponentBase : AActor, abstract, not_blueprintable, within="AActor", config="Game" {
+    /// Virtual method — Skald-managed vtable (§6.2).
+    pub fn initialize() virtual { }
+
+    /// Static method — class-level, not an instance method.
+    pub fn make_default() -> ComponentBase, static {
+        return ComponentBase {}
+    }
+
+    /// Final override — cannot be overridden further.
+    pub fn base_id() -> i32, final {
+        return 0
+    }
+}
+
+/// Concrete subclass.
+pub class Derived : ComponentBase {
+    /// Override of inherited virtual.
+    pub fn initialize(), override {
+        super.initialize()
+    }
+}
+
+/// Field modifier showcase (§7.2).
+pub class FieldModifiers : AActor {
+    /// EditAnywhere + BlueprintReadWrite (default for pub var).
+    pub var health: f32 = 100.0
+
+    /// readonly keyword — VisibleAnywhere + BlueprintReadOnly.
+    pub var cached_value: f32 = 0.0, readonly
+
+    /// Replicated + clamped.
+    pub var ammo: i32 = 30, replicated, clamp(0, 99), category="Combat"
+
+    /// Range (UI slider only).
+    pub var volume: f32 = 0.5, range(0.0, 1.0), category="Audio"
+
+    /// EditDefaultsOnly.
+    pub var archetype_data: str = "", editdefaults_only
+
+    /// VisibleAnywhere only (no Edit).
+    pub var debug_label: str = "x", visibleanywhere
+
+    /// Asset bundle.
+    pub var main_texture: name = "", asset_bundle="UI"
+
+    /// Tooltip override.
+    pub var difficulty: f32 = 1.0, tooltip="Difficulty multiplier for AI.", clamp(0.1, 5.0)
+
+    /// Meta escape hatch.
+    pub var custom_field: i32 = 0, meta="CustomKey=CustomValue"
+}
+
+/// Function modifier showcase (§7.3).
+pub class FuncModifiers : AActor {
+    /// Default BlueprintCallable.
+    pub fn simple_action() { }
+
+    /// BlueprintPure.
+    pub fn get_score() -> f32, pure, category="Gameplay" {
+        return 0.0
+    }
+
+    /// Reliable RPC.
+    pub fn server_fire(target: v3), reliable, category="Combat" { }
+
+    /// Unreliable RPC.
+    pub fn client_cosmetic(fx_id: i32), unreliable, category="VFX" { }
+
+    /// With validation.
+    pub fn validated_move(p: v3), with_validation, category="Movement" { }
+
+    /// Not callable from Blueprint — C++ only.
+    pub fn internal_helper(), not_callable { }
+
+    /// Custom display name.
+    pub fn get_player_name() -> str, pure, display_name="Player Name" {
+        return "Player"
+    }
+
+    /// Advanced display — first N params are simple, rest in advanced.
+    pub fn complex_op(a: i32, b: i32, c: i32, d: i32), advanced_display=2 { }
+}
+
+/// Enum showcase (§6.2).
+pub enum DamageType : u8 {
+    Physical
+    Magical
+    True
+    Heal
+}
+
+/// Enum with explicit discriminants.
+pub enum Team : u8 {
+    Neutral = 0
+    Red = 1
+    Blue = 2
+    Spectator = 255
+}

@@ -1,0 +1,78 @@
+//! Spec §5.4, §5.5, §12.2 — generics, traits, impl blocks.
+//! OOP showcase.
+
+use ue::AActor;
+
+/// Trait for things that can take damage.
+pub trait Damageable {
+    /// Apply damage to this object. Returns actual damage applied.
+    pub fn take_damage(amount: f32) -> f32;
+    /// Heal the object.
+    pub fn heal(amount: f32) -> f32;
+}
+
+/// Trait for things that have a 3D position.
+pub trait Locatable {
+    pub fn location() -> v3;
+    pub fn set_location(p: v3);
+}
+
+/// Generic pool — uses `T: Locatable` bound.
+class Pool<T: Locatable> {
+    var items: arr<T>
+
+    fn acquire() -> T? {
+        if self.items.is_empty() {
+            return null
+        }
+        return self.items.pop()
+    }
+
+    fn release(item: T) {
+        self.items.push(item)
+    }
+}
+
+/// Concrete alias — this gets reflected (§5.4).
+type ActorPool = Pool<AActor>
+
+/// Combatant implements Damageable.
+pub class Combatant : AActor {
+    pub var health: f32 = 100.0, replicated, clamp(0, 1000), category="Combat"
+    pub var max_health: f32 = 100.0, clamp(1, 10000), category="Combat"
+
+    pub fn take_damage(amount: f32) -> f32, override {
+        let actual = amount.min(self.health)
+        self.health -= actual
+        return actual
+    }
+
+    pub fn heal(amount: f32) -> f32, override {
+        let actual = amount.min(self.max_health - self.health)
+        self.health += actual
+        return actual
+    }
+}
+
+/// Free generic function — finds nearest item.
+fn nearest<T: Locatable>(items: arr<T>, p: v3) -> T? {
+    var best: T? = null
+    var best_dist: f32 = 999999.0
+    for item in items {
+        let d = (item.location() - p).length()
+        if d < best_dist {
+            best_dist = d
+            best = item
+        }
+    }
+    return best
+}
+
+/// Impl block — explicit trait implementation.
+impl Damageable for Combatant {
+    pub fn take_damage(amount: f32) -> f32 {
+        let actual = amount.min(self.health)
+        self.health -= actual
+        return actual
+    }
+}

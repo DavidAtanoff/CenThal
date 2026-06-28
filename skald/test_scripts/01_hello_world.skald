@@ -1,0 +1,25 @@
+//! Module-level doc comment.
+//! Greeter is the canonical "hello world" from spec §15.1.
+
+use ue::AActor;
+use ue::log;
+
+/// A simple greeting actor that says hello to tagged actors.
+pub class Greeter : AActor {
+    /// The greeting text to display.
+    pub var greeting: str = "Hello"
+    /// Tag identifying which actors to greet.
+    pub var target_tag: name = "Player"
+
+    fn begin_play() override {
+        super.begin_play()
+        for actor in world().actors_with_tag(self.target_tag) {
+            log::info(f"{self.greeting}, {actor.name()}!")
+        }
+    }
+
+    /// Shout the greeting loudly.
+    pub fn shout() {
+        log::info(f"{self.greeting.to_upper()}!!!")
+    }
+}

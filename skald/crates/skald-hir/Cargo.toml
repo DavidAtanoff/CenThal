@@ -1,0 +1,14 @@
+[package]
+name = "skald-hir"
+description = "High-level IR: desugared AST used by type-checker (spec §3.2). Stub for Phase 2."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+skald-ast.workspace = true
+skald-types.workspace = true
+skald-resolve.workspace = true
+rustc-hash.workspace = true
+indexmap.workspace = true

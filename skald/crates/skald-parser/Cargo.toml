@@ -1,0 +1,13 @@
+[package]
+name = "skald-parser"
+description = "Recursive-descent + Pratt parser for Skald (spec §3.2, §4)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+skald-ast.workspace = true
+skald-lexer.workspace = true
+rustc-hash.workspace = true
+smallvec.workspace = true

@@ -1,0 +1,57 @@
+//! Spec §15.2 — hot-path particle simulation with @unsafe, @region, @simd, @layout(soa).
+
+use ue::AActor;
+use ue::log;
+use ue::mem;
+
+/// Particle for the sim — POD, no GC refs.
+@pod
+struct Particle {
+    var pos: v3
+    var vel: v3
+    var life: f32
+}
+
+/// Particle simulator using all the Skald-native annotations.
+pub class ParticleSim : AActor {
+    /// @layout(soa) restricted to private fields in v0.3 (§5.6).
+    @layout(soa)
+    private var particles: arr<Particle> = arr::new()
+
+    pub var particle_count: i32 = 0, readonly
+
+    @hot
+    fn tick(dt: f32) override {
+        @region("sim_frame")
+        @simd
+        for mut p in self.particles.mut_iter() {
+            p.vel += v3(0, 0, -9.8) * dt
+            p.pos += p.vel * dt
+            p.life -= dt
+        }
+
+        @unsafe {
+            // Direct ptr write into mapped GPU buffer.
+            let gpu_buf = self.gpu_buf
+            let dst: *mut v3 = gpu_buf.raw_mut()
+            mem::copy_nonoverlapping(self.particles.pos_ptr(), dst, self.particles.len())
+        }
+
+        self.particle_count = self.particles.len()
+    }
+
+    private var gpu_buf: GpuBuffer = GpuBuffer::new()
+}
+
+struct GpuBuffer {
+    fn new() -> GpuBuffer { GpuBuffer {} }
+    fn raw_mut(self: mut Self) -> *mut v3 {
+        @unsafe {
+            return std::ptr::null_mut()
+        }
+    }
+}
+
+/// Inline a tight math loop (§11.5).
+@inline(always)
+fn fast_sin(x: f32) -> f32 => x * 3.14159 / 180.0

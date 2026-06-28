@@ -1,0 +1,27 @@
+[package]
+name = "skald-driver"
+description = "CLI entry point orchestrating lexer→parser→resolve→types→borrowck (spec §3.2)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "skaldc"
+path = "src/main.rs"
+
+[lib]
+name = "skald_driver"
+path = "src/lib.rs"
+
+[dependencies]
+skald-ast.workspace = true
+skald-lexer.workspace = true
+skald-parser.workspace = true
+skald-modifiers.workspace = true
+skald-types.workspace = true
+skald-resolve.workspace = true
+skald-borrowck.workspace = true
+skald-hir.workspace = true
+rustc-hash.workspace = true
+ariadne.workspace = true

@@ -1,0 +1,4 @@
+pub class Greeter {
+    fn begin_play() {
+    }
+}

@@ -1,0 +1,12 @@
+[package]
+name = "skald-ast"
+description = "Pure AST data structures for the Skald language (spec §3.2)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+rustc-hash.workspace = true
+smallvec.workspace = true
+serde.workspace = true

@@ -1,0 +1,62 @@
+# Skald compiler workspace — virtual workspace manifest
+# See spec §3.1: the workspace is organized so each phase of the compiler
+# is independently testable and so the UE5 integration layer is isolated
+# from the language core.
+#
+# v0.3 frontend milestone: this workspace implements the Phase 1 + Phase 1.5
+# frontend (lexer, parser, ast, resolve, types, borrowck, modifiers).
+# Backend crates (hir, tir, mono, codegen, runtime, lsp, bindgen, link,
+# ubt-plugin) are stubbed for future phases.
+
+[workspace]
+resolver = "2"
+members = [
+    "crates/skald-ast",
+    "crates/skald-lexer",
+    "crates/skald-parser",
+    "crates/skald-modifiers",
+    "crates/skald-types",
+    "crates/skald-resolve",
+    "crates/skald-borrowck",
+    "crates/skald-hir",
+    "crates/skald-driver",
+]
+
+[workspace.package]
+version = "0.3.0"
+edition = "2021"
+rust-version = "1.75"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/skald-lang/skald"
+authors = ["Skald Team"]
+
+[workspace.dependencies]
+# Internal crates — pinned to workspace version.
+skald-ast = { path = "crates/skald-ast", version = "0.3.0" }
+skald-lexer = { path = "crates/skald-lexer", version = "0.3.0" }
+skald-parser = { path = "crates/skald-parser", version = "0.3.0" }
+skald-modifiers = { path = "crates/skald-modifiers", version = "0.3.0" }
+skald-types = { path = "crates/skald-types", version = "0.3.0" }
+skald-resolve = { path = "crates/skald-resolve", version = "0.3.0" }
+skald-borrowck = { path = "crates/skald-borrowck", version = "0.3.0" }
+skald-hir = { path = "crates/skald-hir", version = "0.3.0" }
+skald-driver = { path = "crates/skald-driver", version = "0.3.0" }
+
+# External deps shared across crates — pinned in one place.
+rustc-hash = "1.1"
+indexmap = "2"
+smallvec = "1"
+thiserror = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ariadne = "0.4"
+ena = "0.14"
+
+[profile.release]
+codegen-units = 16
+lto = "thin"
+debug = false
+
+[profile.dev]
+opt-level = 1  # faster lexer/parser tests
+debug = true

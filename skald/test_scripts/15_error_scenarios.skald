@@ -1,0 +1,71 @@
+//! Spec §15.4 — error message scenarios.
+//! These are designed to verify the compiler produces helpful diagnostics.
+
+use ue::AActor;
+
+/// Modifier typo — should produce error with suggestion.
+pub class TypoTest : AActor {
+    // `replictated` — typo of `replicated`
+    pub var buggy_field: f32 = 0.0, replictated
+}
+
+/// Missing `pub` — should produce a warning (§15.4).
+pub class UnreflectedField : AActor {
+    var forgotten: f32 = 100.0
+}
+
+/// GC violation — UObject captured in worker thread (§13.2, §15.4).
+pub class WorkerViolation : AActor {
+    pub var enemies: arr<ref<AActor>>
+
+    fn bad_worker() {
+        spawn worker {
+            for enemy in self.enemies {
+                enemy.kill()
+            }
+        }
+    }
+}
+
+/// Method that should use `override` keyword but doesn't.
+pub class MissingOverride : AActor {
+    fn begin_play() {
+        // Forgot `override` keyword — would normally be a warning/error.
+    }
+}
+
+/// Type mismatch example.
+pub class TypeMismatch : AActor {
+    pub var target: weak<AActor>
+
+    fn assign() {
+        let pos = v3(0, 0, 0)
+        // This would be a type error: assigning v3 to weak<AActor>.
+        // (Commented out — we want the file to parse.)
+        // self.target = pos
+        let _ = pos
+    }
+}
+
+/// Generic class cannot be reflected (§6.4).
+class GenericClass<T> {
+    var items: arr<T>
+}
+
+/// Concrete alias — this gets reflected.
+type IntPool = GenericClass<i32>
+
+pub class PoolHolder : AActor {
+    pub var pool: IntPool
+}
+
+/// `static var` as `pub` — should error (§6.4).
+pub class StaticVarTest : AActor {
+    // `pub static var x: f32` would error: "static variables cannot be reflected"
+    // Commented out for parsing success:
+    // pub static var x: f32 = 0.0
+    private static var x: f32 = 0.0
+}
+
+/// `const` is not reflected (§6.4).
+pub const MAX_PLAYERS: i32 = 4

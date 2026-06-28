@@ -1,0 +1,13 @@
+[package]
+name = "skald-resolve"
+description = "Two-phase name resolution for Skald (spec §3.2, §5.8)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+skald-ast.workspace = true
+skald-types.workspace = true
+rustc-hash.workspace = true
+indexmap.workspace = true

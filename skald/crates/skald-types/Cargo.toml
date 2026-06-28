@@ -1,0 +1,12 @@
+[package]
+name = "skald-types"
+description = "Type system: Type, Trait, GenericBound, Substitution, unification (spec §3.2, §5)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+skald-ast.workspace = true
+rustc-hash.workspace = true
+ena.workspace = true

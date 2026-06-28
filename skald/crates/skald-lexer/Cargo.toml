@@ -1,0 +1,12 @@
+[package]
+name = "skald-lexer"
+description = "Hand-rolled state-machine tokenizer for Skald (spec §3.2, §4)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+skald-ast.workspace = true
+rustc-hash.workspace = true
+smallvec.workspace = true

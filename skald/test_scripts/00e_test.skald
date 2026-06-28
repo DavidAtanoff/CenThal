@@ -1,0 +1,7 @@
+pub class Greeter {
+    pub var greeting: str = "Hello"
+
+    fn begin_play() override {
+        super.begin_play()
+    }
+}

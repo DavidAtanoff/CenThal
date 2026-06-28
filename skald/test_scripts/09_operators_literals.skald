@@ -1,0 +1,105 @@
+//! Spec §4.6, §4.7 — operator + literal coverage.
+//! Exercises the Pratt parser.
+
+use ue::AActor;
+
+pub class Operators : AActor {
+    fn run() {
+        // Arithmetic
+        let a = 1 + 2 - 3 * 4 / 5 % 6
+
+        // Bitwise
+        let b = 1 & 2 | 3 ^ 4 << 5 >> 6
+
+        // Comparison
+        let c = (1 == 2) || (3 != 4) && (5 < 6) || (7 <= 8) || (9 > 10) || (11 >= 12)
+
+        // Logical
+        let d = true && false || !true
+
+        // Assignment variants
+        var e: i32 = 10
+        e += 1
+        e -= 2
+        e *= 3
+        e /= 4
+        e %= 5
+        e &= 6
+        e |= 7
+        e ^= 8
+        e <<= 1
+        e >>= 2
+
+        // Null-coalescing / Elvis
+        let maybe: i32? = null
+        let safe: i32 = maybe ?? 42
+        let elvis: i32 = maybe ?: 0
+
+        // Pipe forward
+        let result = 5 |> double |> inc
+        let _ = result
+
+        // Range
+        for i in 0..10 {
+            log::info(f"i = {i}")
+        }
+        for j in 0..=100 {
+            log::info(f"j = {j}")
+        }
+
+        // Cast / is
+        let f = 3.14
+        let g = f as i32
+        if f is f64 {
+            log::info("f is f64")
+        }
+
+        // Unwrap
+        let opt: i32? = 7
+        let unwrapped: i32 = opt!
+    }
+
+    fn literals() {
+        // Integers
+        let i32_v = 123
+        let i8_v = 123i8
+        let u8_v = 0xFF
+        let bin_v = 0b1010
+        let big_v = 1_000_000
+
+        // Floats
+        let f64_v = 1.0
+        let f32_v = 1.0f32
+        let sci_v = 1.5e10
+        let neg_v = -3.14
+
+        // Strings
+        let s1 = "plain"
+        let s2 = f"interpolated: {i32_v} and {f64_v}"
+        let bytes = b"raw bytes"
+
+        // Chars
+        let c1 = 'a'
+        let c2 = '\n'
+        let c3 = '\u{1F600}'
+
+        // Vectors
+        let v3_v = v3(1, 2, 3)
+        let quat_v = quat(0, 0, 0, 1)
+
+        // Booleans / null
+        let t = true
+        let f = false
+        let n = null
+
+        // Tuples
+        let pair = (1, "two")
+        let triple = (1, 2.0, v3(0, 0, 0))
+
+        // Unit
+        let u = ()
+    }
+}
+
+fn double(x: i32) -> i32 => x * 2
+fn inc(x: i32) -> i32 => x + 1

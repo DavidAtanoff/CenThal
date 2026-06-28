@@ -1,0 +1,6 @@
+use ue::AActor;
+use ue::log;
+
+pub class Greeter : AActor {
+    pub var greeting: str = "Hello"
+}

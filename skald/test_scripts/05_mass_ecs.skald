@@ -1,0 +1,63 @@
+//! Spec §12.4-12.5 — Mass ECS: fragments, processors, queries, dual-world bridge.
+
+use ue::AActor;
+use ue::mass;
+use ue::world;
+
+/// Position fragment — Mass ECS component.
+@mass_fragment
+@pod
+pub struct Position : POD {
+    var v: v3
+}
+
+/// Velocity fragment.
+@mass_fragment
+@pod
+pub struct Velocity : POD {
+    var v: v3
+}
+
+/// Health fragment for combat entities.
+@mass_fragment
+@pod
+pub struct HealthFragment : POD {
+    var current: f32
+    var max: f32
+}
+
+/// Movement processor — runs before physics, writes positions.
+@mass_processor(group="movement", tick_before="PhysicsMass")
+pub fn move_things(q: query<mut Position, Velocity>, dt: f32) {
+    @simd
+    for (mut pos, vel) in q {
+        pos.v += vel.v * dt
+    }
+}
+
+/// Damage processor — applies damage over time.
+@mass_processor(group="combat")
+pub fn apply_damage(q: query<mut HealthFragment>, dt: f32) {
+    for mut health in q {
+        if health.current > 0.0 {
+            health.current -= 1.0 * dt
+        }
+    }
+}
+
+/// Dual-world bridge — actor that owns Mass entities (§12.5).
+pub class Swarm : AActor {
+    var entities: arr<FMassEntityHandle>
+
+    fn spawn_one(p: v3) {
+        let e = mass::spawn(self.world(), Position{v: p}, Velocity{v: v3(0, 0, 0)})
+        self.entities.push(e)
+    }
+
+    fn begin_play() override {
+        super.begin_play()
+        for i in 0..100 {
+            self.spawn_one(v3(i as f32, 0.0, 0.0))
+        }
+    }
+}
